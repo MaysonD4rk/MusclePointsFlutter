@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:muscle_points/Widgets/ExerList.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:muscle_points/Widgets/saveData.dart';
 import 'package:provider/provider.dart';
+
 
 
 class Exercicios{
@@ -245,8 +247,8 @@ class Exercicios{
             print(jsonString.substring(i, end));
           }
         }
-
-
+        print("ta aqui ó");
+        print(json.encode(listaForm));
         return json.encode(listaForm);
 
       }
@@ -460,6 +462,33 @@ class Exercicios{
     return "acho que não";
 
 
+  }
+
+
+  deleteMuscularGroup(context,muscularGroup, list){
+    final exerList = Provider.of<ExerList>(context, listen: false);
+    SaveData savedata = SaveData();
+    
+    Map<String, dynamic> listForm = json.decode(list);
+
+    //print(listForm["exercicios"][muscularGroup].length);
+
+    for(var i=0;i<= listForm["exercicios"].length;i++){
+
+      if(listForm["exercicios"][i].containsKey(muscularGroup)){
+
+        listForm["exercicios"].removeAt(i);
+        exerList.atualizarLista(json.encode(listForm));
+        savedata.salvarDadosEmArquivo(json.encode(listForm));
+        
+      }
+
+
+
+
+    }
+
+    return "acho que não";
   }
 
 
