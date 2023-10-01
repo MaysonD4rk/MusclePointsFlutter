@@ -32,6 +32,7 @@ class _HomeState extends State<Home> {
 
   TextEditingController _newMuscularGroup = TextEditingController();
   TextEditingController _newExercise = TextEditingController();
+  TextEditingController _maxWeight = TextEditingController();
 
   var preColors = [
     Colors.yellow,
@@ -48,6 +49,10 @@ class _HomeState extends State<Home> {
   var addExerciseButton = true;
   var deleteItem = false;
   var _loaded = false;
+  var chartVisibility = false;
+  var containerHeight = 500.0;
+
+  var calcAvgPts = [];
 
   //Chart
 
@@ -61,8 +66,27 @@ class _HomeState extends State<Home> {
 
   var _lista = '{"exercicios": []}';
 
-  //var _lista = '{"exercicios": []}';
-  Exercicios exerciciosClass = Exercicios("","",[],[]);
+  //var _lista = '{"exercicios":[{"Peito":[{"date":"27/09/2023","lastAvg":8.95,"treino":[{"nome":"Supino","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"28/09/2023","lastAvg":5.0,"treino":[{"nome":"Supino","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"29/09/2023","lastAvg":7.0,"treino":[{"nome":"Supino","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"30/09/2023","lastAvg":8.0,"treino":[{"nome":"Supino","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"31/10/2023","lastAvg":9.0,"treino":[{"nome":"Supino","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}] }], "color": "blue"},{"Perna":[{"date":"15/09/2023","lastAvg":9.0,"treino":[{"nome":"Leg press","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"16/09/2023","lastAvg":2.0,"treino":[{"nome":"Leg press","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"17/09/2023","lastAvg":3.0,"treino":[{"nome":"Leg press","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"18/09/2023","lastAvg":5.0,"treino":[{"nome":"Leg press","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]},{"date":"19/10/2023","lastAvg":7.0,"treino":[{"nome":"Leg press","repetições":[12,12,11,10],"kg":[20,20,20,20],"cargaMaxima":25.0,"pts":8.7},{"nome":"Cross","repetições":[12,12,12],"kg":[25,25,25],"cargaMaxima":30.0,"pts":9.2}]}], "color": "red"}]}';
+
+
+  Color? parseColor([String corString="white"]) {
+    Map<String, Color> cores = {
+      "red": Colors.blue,
+      "blue": Colors.red,
+      "black": Colors.black,
+      "pink": Colors.pink,
+      "orange": Colors.orange,
+      "white": Colors.white,
+      // "red", "blue", "black", "pink", "white", "orange"
+    };
+
+    return cores[corString];
+  }
+
+
+
+
+  Exercicios exerciciosClass = Exercicios("","",[],[], "");
   SaveData savedata = SaveData();
 
   Future<String> getData() async {
@@ -92,8 +116,6 @@ class _HomeState extends State<Home> {
 
 
 
-
-
   List<Exercicios> currentExerContext = [];
 
 
@@ -116,10 +138,23 @@ class _HomeState extends State<Home> {
 
         List<Exercicios> gruposMusculares = [];
 
-        listaForm["exercicios"].forEach((exer){
-          var groupName = exer.keys.first;
-          gruposMusculares.add(Exercicios("ExerList", groupName, [], []));
-        });
+        // listaForm["exercicios"].forEach((exer, index){
+        //   var groupName = exer.keys.first;
+        //
+        //
+        //   print(textColor);
+        //   gruposMusculares.add(Exercicios("ExerList", groupName, [], [], textColor));
+        // });
+
+        for(var i = 0;i<listaForm["exercicios"].length;i++){
+          var groupName = listaForm["exercicios"][i].keys.first;
+          var textColor = listaForm["exercicios"][i]["color"];
+          print(listaForm["exercicios"][0]);
+          print(textColor);
+
+          gruposMusculares.add(Exercicios("ExerList", groupName, [], [], textColor));
+
+        }
 
 
         return gruposMusculares;
@@ -143,7 +178,7 @@ class _HomeState extends State<Home> {
               String nome = exercicioData[index]['nome'];
 
 
-              Exercicios exer = Exercicios("DataList",nome, repeticoes, kgs);
+              Exercicios exer = Exercicios("DataList",nome, repeticoes, kgs, "");
 
               exercicios.add(exer);
             }
@@ -171,9 +206,10 @@ class _HomeState extends State<Home> {
 
   void _loadExercicios(groupClicked) {
 
-    currentMuscularGroup = groupClicked;
+
 
     setState(() {
+      currentMuscularGroup = groupClicked;
       addExerciseInput = false;
       addMuscularGroupButton = false;
       addMuscularGroupInput = false;
@@ -181,6 +217,9 @@ class _HomeState extends State<Home> {
       showBackButton = true;
       _saveListButton = true;
       deleteItem = true;
+      chartVisibility = true;
+      containerHeight = 800.0;
+
       _loaded = true;
       _futureExercicios = _getExercicios("exercises",groupClicked); // Recarrega o Future
     });
@@ -195,6 +234,8 @@ class _HomeState extends State<Home> {
       addMuscularGroupButton = true;
       addExerciseInput = false;
       deleteItem = false;
+      chartVisibility = false;
+      containerHeight = 500.0;
       //addExerciseButton = false;
       _loaded = false;
       _saveListButton = false;
@@ -234,15 +275,13 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 
+    //savedata.deleteFile();
+
     currentExerContext = [];
 
     DateTime dataAtual = DateTime.now();
     String dataFormatada = DateFormat('dd/MM/yyyy').format(dataAtual);
     print(dataFormatada);
-
-
-
-
 
 
 
@@ -284,7 +323,7 @@ class _HomeState extends State<Home> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     width: 400,
-                                    height: 800,
+                                    height: containerHeight,
                                     child: Column(
                                       children: [
                                         Row(
@@ -398,7 +437,7 @@ class _HomeState extends State<Home> {
                                                   },
                                                   highlightColor: Colors.black.withOpacity(0.5), // Cor de destaque
                                                   child: ListTile(
-                                                    title: Text(exercicio!.exercicio),
+                                                    title: Text(exercicio!.exercicio, style: TextStyle(color: parseColor(exercicio.textColor)),),
                                                     subtitle: Text("Ultima vez treinado: 27/08/2003"),
                                                   ),
                                                 );
@@ -467,14 +506,30 @@ class _HomeState extends State<Home> {
                                                         context: context,
                                                         builder: (context){
                                                           return AlertDialog(
-                                                            title: Text('Campo Obrigatório'),
-                                                            content: Text('Por favor, preencha o campo antes de continuar.'),
+                                                            title: Text('Certeza que quer adicionar exercicio?', style: TextStyle(fontSize: 16),),
+                                                            content: Row(
+                                                              children: [
+                                                                Text("Carga máxima"),
+                                                                Expanded(child:
+                                                                TextField(
+                                                                  controller: _maxWeight,
+                                                                  textAlign: TextAlign.center,
+                                                                 decoration: InputDecoration(
+                                                                   hintText: "20kg",
+                                                                 ),
+                                                                )
+                                                                )
+                                                            ]),
                                                             actions: [
                                                               ElevatedButton(
                                                                 onPressed: () {
 
+                                                                  Navigator.pop(context);
+
                                                                   print(_lista);
-                                                                  var newLista = exerciciosClass.newExercise(currentMuscularGroup, _newExercise.text, _lista);
+
+                                                                  var newLista = exerciciosClass.newExercise(currentMuscularGroup, _newExercise.text,_lista, double.parse(_maxWeight.text));
+
                                                                   setState(() {
                                                                     addExerciseInput = false;
                                                                   });
@@ -506,13 +561,16 @@ class _HomeState extends State<Home> {
                                               )
                                           ),
                                         ),
+                                        Visibility(
+                                            visible: chartVisibility,
+                                            child:
                                         Container(
                                           height: 350,
                                           decoration: BoxDecoration(
                                             color: Color(0xFF392f5b),
                                             borderRadius: BorderRadius.circular(10.0),
                                           ),
-                                          child: AspectRatio(
+                                          child:  AspectRatio(
                                             aspectRatio: 1.23,
                                             child: Stack(
                                               children: <Widget>[
@@ -548,7 +606,7 @@ class _HomeState extends State<Home> {
                                                     Expanded(
                                                       child: Padding(
                                                         padding: const EdgeInsets.only(right: 16, left: 6),
-                                                        child: LineChartExer(isShowingMainData, _lista),
+                                                        child: LineChartExer(isShowingMainData, _lista, currentMuscularGroup),
                                                       ),
                                                     ),
                                                     const SizedBox(
@@ -560,6 +618,7 @@ class _HomeState extends State<Home> {
                                               ],
                                             ),
                                           ),
+                                          )
                                         ),
 
 
@@ -569,7 +628,7 @@ class _HomeState extends State<Home> {
                                 Visibility(
                                     visible: _saveListButton,
                                     child: ElevatedButton(onPressed: (){
-                                      print(currentExerContext);
+                                      calcAvgPts = [];
                                       for(var i=0;i<currentExerContext.length;i++){
 
                                         if(currentExerContext[i].saveCurrentData(context) == "notChange"){
@@ -625,8 +684,30 @@ class _HomeState extends State<Home> {
 
                                               print(j);
                                               var treino = mapList["exercicios"][j][currentMuscularGroup][mapList["exercicios"][j][currentMuscularGroup].length-1]["treino"];
+                                              print("reps");
+                                              print(conversao["reps"]);
 
-                                              treino[i] = {"nome": currentExerContext[i].exercicio,"repetições": [...conversao["reps"]],"kg": [...conversao["kgs"]]};
+                                              var kgsMap = conversao["kgs"].map((e){
+                                                var pts = (e/treino[i]["cargaMaxima"]);
+                                                return pts*10;
+                                              });
+
+                                              var kgsPts = kgsMap.toList().reduce((a, b) => a + b)/kgsMap.toList().length;
+                                              var repPts = double.parse(((conversao["reps"].reduce((a, b) => a + b)/(12*conversao["reps"].length))*10).toStringAsFixed(1));
+                                              print(repPts);
+                                              print("kgs");
+                                              print((kgsPts+repPts)/2);
+
+                                              var ptResult = double.parse(((kgsPts+repPts)/2).toStringAsFixed(1));
+
+                                              calcAvgPts.add(ptResult);
+
+                                              treino[i] = {"nome": currentExerContext[i].exercicio,"repetições": [...conversao["reps"]],"kg": [...conversao["kgs"]], "cargaMaxima": treino[i]["cargaMaxima"], "pts": ptResult };
+
+                                              //calcAvgPts.reduce((a,b)=>a+b);
+                                              var dayPoint = calcAvgPts.reduce((a,b)=>a+b)/calcAvgPts.length;
+
+                                              mapList["exercicios"][j][currentMuscularGroup][mapList["exercicios"][j][currentMuscularGroup].length-1]["lastAvg"] = dayPoint;
 
                                               setState((){
                                                 _lista = json.encode(mapList);

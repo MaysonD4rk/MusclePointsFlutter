@@ -42,5 +42,22 @@ class SaveData{
     return await file.exists();
   }
 
+  Future<void> deleteFile() async {
+    try {
+      Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
+      String filePath = '${appDocumentsDirectory.path}/listJson.txt';
+      File file = File(filePath);
+
+      if (await file.exists()) {
+        await file.delete();
+        print('Arquivo listJson excluído com sucesso.');
+      } else {
+        print('O arquivo listJson não existe.');
+      }
+    } catch (e) {
+      print('Erro ao excluir o arquivo listJson: $e');
+    }
+  }
+
 
 }

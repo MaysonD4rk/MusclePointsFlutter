@@ -15,11 +15,13 @@ class Exercicios{
   String screen;
   List _repeticoes;
   List _kgs;
+  var _textColor;
+
 
   List<TextEditingController> textRepControllers = [];
   List<TextEditingController> textKgControllers = [];
 
-  Exercicios( this.screen, this._exercicio,this._repeticoes, this._kgs){
+  Exercicios( this.screen, this._exercicio,this._repeticoes, this._kgs, this._textColor){
     // Crie os controladores no construtor
     for (var i = 0; i < _repeticoes.length; i++) {
       TextEditingController textRepController = TextEditingController();
@@ -33,12 +35,17 @@ class Exercicios{
   }
 
 
+  List preColors = ["red", "blue", "black", "pink", "indigo", "orange"];
+
+
 
 
   List subReps = [];
   List subKgs = [];
   bool campoVazio = false;
   bool deleteIcon = false;
+
+  get textColor => _textColor;
 
   List get kgs => _kgs;
 
@@ -193,7 +200,8 @@ class Exercicios{
 
   newMuscularGroup(muscularGroupName, currentList){
     Map<String, dynamic> listaForm = json.decode(currentList);
-    listaForm["exercicios"].add({muscularGroupName: []});
+
+    listaForm["exercicios"].add({muscularGroupName: [], "color": preColors[listaForm["exercicios"].length]});
     String jsonString = json.encode(listaForm);
 
     var buffer = StringBuffer(jsonString);
@@ -209,7 +217,7 @@ class Exercicios{
 
   }
 
-  newExercise(muscularGroupName,exerciseName, currentList){
+  newExercise(muscularGroupName,exerciseName, currentList, [double maxWeigth = 0.0]){
     Map<String, dynamic> listaForm = json.decode(currentList);
 
     DateTime dataAtual = DateTime.now();
@@ -221,7 +229,7 @@ class Exercicios{
       if(listaForm["exercicios"][i].containsKey(muscularGroupName)) {
 
         if(listaForm["exercicios"][i][muscularGroupName].length>0){
-          listaForm["exercicios"][i][muscularGroupName][listaForm["exercicios"][i][muscularGroupName].length-1]["treino"].add({"nome":"$exerciseName","repetições":[],"kg":[]});
+          listaForm["exercicios"][i][muscularGroupName][listaForm["exercicios"][i][muscularGroupName].length-1]["treino"].add({"nome":"$exerciseName","repetições":[],"kg":[], "cargaMaxima": maxWeigth, "ptRecord": 0.0});
 
 
           String jsonString = json.encode(listaForm);
@@ -234,7 +242,7 @@ class Exercicios{
             print(jsonString.substring(i, end));
           }
         }else{
-          listaForm["exercicios"][i][muscularGroupName].add({"date": dataFormatada, "treino": [{"nome":"$exerciseName","repetições":[],"kg":[]}]});
+          listaForm["exercicios"][i][muscularGroupName].add({"date": dataFormatada,"lastAvg": 0.0, "treino": [{"nome":"$exerciseName","repetições":[],"kg":[], "cargaMaxima": maxWeigth, "pts": 0.0}]});
 
 
           String jsonString = json.encode(listaForm);

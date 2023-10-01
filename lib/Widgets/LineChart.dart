@@ -8,8 +8,9 @@ class LineChartExer extends StatelessWidget {
 
   final bool isShowingMainData;
   String lista;
+  String currentMuscularGroup;
 
-  LineChartExer(this.isShowingMainData, this.lista);
+  LineChartExer(this.isShowingMainData, this.lista, this.currentMuscularGroup);
 
 
   @override
@@ -31,6 +32,20 @@ class LineChartExer extends StatelessWidget {
     maxY: 10,
     minY: 0,
   );
+
+  Color? parseColor([String corString="white"]) {
+    Map<String, Color> cores = {
+      "red": Colors.blue,
+      "blue": Colors.red,
+      "black": Colors.black,
+      "pink": Colors.pink,
+      "orange": Colors.orange,
+      "white": Colors.white,
+      // "red", "blue", "black", "pink", "white", "orange"
+    };
+
+    return cores[corString];
+  }
 
 
 
@@ -135,65 +150,118 @@ class LineChartExer extends StatelessWidget {
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
 
+    print("caiu aqui ahhhhhhhhhhhh");
+
+    int compararDatas(String a, String b) {
+      final partesA = a.split('/').map(int.parse).toList();
+      final partesB = b.split('/').map(int.parse).toList();
+
+      // Comparamos primeiro os dias (partesA[0] e partesB[0]),
+      // depois os meses (partesA[1] e partesB[1]).
+      if (partesA[1] == partesB[1]) {
+        return partesA[0].compareTo(partesB[0]);
+      } else {
+        return partesA[1].compareTo(partesB[1]);
+      }
+    }
+
+
     Map<String, dynamic> jsonData = json.decode(lista);
 
     List<String> datesList = [];
 
+
+
+
     // Itera sobre os exercícios
-    for (var exercise in jsonData['exercicios']) {
-      // Itera sobre os treinos de cada exercício
-      for (var workout in exercise.values.first) {
-        String date = workout['date'];
-        // Formata a data para exibir apenas "dd/mm"
-        String formattedDate = date.split('/')[0] + '/' + date.split('/')[1];
-        // Verifica se a data já existe na lista antes de adicioná-la
-        if (!datesList.contains(formattedDate)) {
-          datesList.add(formattedDate);
+    if(jsonData['exercicios'].length>0 && jsonData['exercicios'][0].values.first.length>0) {
+      print(jsonData['exercicios'][0]);
+
+
+      for (var exercise in jsonData['exercicios']) {
+        // Itera sobre os treinos de cada exercício
+        print('exercise');
+        print(currentMuscularGroup);
+        if(exercise.keys.first == currentMuscularGroup) {
+          print("entrou chara");
+          print(exercise.keys.first);
+          print(exercise.values.first);
+          for (var workout in exercise.values.first) {
+            String date = workout['date'];
+            // Formata a data para exibir apenas "dd/mm"
+            String formattedDate = date.split('/')[0] + '/' +
+                date.split('/')[1];
+            // Verifica se a data já existe na lista antes de adicioná-la
+            if (!datesList.contains(formattedDate)) {
+              datesList.add(formattedDate);
+            }
+            print(datesList);
+          }
         }
       }
+
+      // Ordene a lista de datas
+      datesList.sort(compararDatas);
+
+      var lastWeekTrain = datesList.length>5 ? datesList.sublist(datesList.length - 5) : datesList;
+
+
+      const style = TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          color: Colors.white
+      );
+      Widget text;
+      switch (value.toInt()) {
+        case 1:
+          text = Text(lastWeekTrain[0] != null && lastWeekTrain[0].isNotEmpty
+              ? lastWeekTrain[0]
+              : "", style: style);
+          break;
+        case 4:
+          text = Text(lastWeekTrain.length > 1 && lastWeekTrain[1] != null &&
+              lastWeekTrain[1].isNotEmpty ? lastWeekTrain[1] : "",
+              style: style);
+          break;
+        case 7:
+          text = Text(lastWeekTrain.length > 2 && lastWeekTrain[2] != null &&
+              lastWeekTrain[2].isNotEmpty ? lastWeekTrain[2] : "",
+              style: style);
+          break;
+        case 10:
+          text = Text(lastWeekTrain.length > 3 && lastWeekTrain[3] != null &&
+              lastWeekTrain[3].isNotEmpty ? lastWeekTrain[3] : "",
+              style: style);
+          break;
+        case 13:
+          text = Text(lastWeekTrain.length > 4 && lastWeekTrain[4] != null &&
+              lastWeekTrain[4].isNotEmpty ? lastWeekTrain[4] : "",
+              style: style);
+          break;
+        case 16:
+          text = Text(lastWeekTrain.length > 5 && lastWeekTrain[5] != null &&
+              lastWeekTrain[5].isNotEmpty ? lastWeekTrain[5] : "",
+              style: style);
+          break;
+        default:
+          text = Text('');
+          break;
+      }
+
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        space: 7,
+        child: text,
+      );
+
+    }else{
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        space: 7,
+        child: Text(""),
+      );
     }
 
-    // Ordene a lista de datas
-    datesList.sort();
-
-    var lastWeekTrain = datesList.reversed.toList();
-
-
-    const style = TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 14,
-        color: Colors.white
-    );
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text(lastWeekTrain[0] != null && lastWeekTrain[0].isNotEmpty ? lastWeekTrain[0] : "", style: style);
-        break;
-      case 4:
-        text = Text(lastWeekTrain.length>1 && lastWeekTrain[1] != null && lastWeekTrain[1].isNotEmpty ? lastWeekTrain[1] : "", style: style);
-        break;
-      case 7:
-        text = Text(lastWeekTrain.length>2 && lastWeekTrain[2] != null && lastWeekTrain[2].isNotEmpty ? lastWeekTrain[2] : "", style: style);
-        break;
-      case 10:
-        text = Text(lastWeekTrain.length>3 && lastWeekTrain[3] != null && lastWeekTrain[3].isNotEmpty ? lastWeekTrain[3] : "", style: style);
-        break;
-      case 13:
-        text = Text(lastWeekTrain.length>4 && lastWeekTrain[4] != null && lastWeekTrain[4].isNotEmpty ? lastWeekTrain[4]: "", style: style);
-        break;
-      case 16:
-        text = Text(lastWeekTrain.length>5 && lastWeekTrain[5] != null && lastWeekTrain[5].isNotEmpty ? lastWeekTrain[5]: "", style: style);
-        break;
-      default:
-        text = Text('');
-        break;
-    }
-
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 7,
-      child: text,
-    );
   }
 
   SideTitles get bottomTitles => SideTitles(
@@ -216,23 +284,45 @@ class LineChartExer extends StatelessWidget {
     ),
   );
 
+  var nextDistance = 1.0;
+
   List<LineChartBarData> getLinesChartBarData(){
+
+    var color = "";
+
     Map<String, dynamic> listaForm = json.decode(lista);
     List<LineChartBarData> exercicios = listaForm["exercicios"].map<LineChartBarData>((i){
+      print("separador");
+
+      var lastAvgs = [];
+      List<FlSpot> flSpots = [];
+
+
+      i[i.keys.first].forEach((e){
+        print("i key");
+        if(i.keys.first == currentMuscularGroup){
+
+          color = i["color"];
+
+        lastAvgs.add(e["lastAvg"]);
+        flSpots.add(FlSpot(nextDistance, e["lastAvg"]));
+        nextDistance += 3.0;
+
+        }
+      });
+
+      if(flSpots.length<2){
+        flSpots.add(FlSpot(nextDistance, lastAvgs.length>0?lastAvgs[0]: 0));
+      }
+
       return LineChartBarData(
         isCurved: true,
-        color: Colors.green,
+        color: parseColor(color),
         barWidth: 8,
         isStrokeCapRound: true,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(1, 1),
-          FlSpot(4, 1.5),
-          FlSpot(7, 1.4),
-          FlSpot(10, 3.4),
-          FlSpot(13, 1.8),
-        ],
+        spots: [...flSpots],
       );
     }).toList();
       print(exercicios);
