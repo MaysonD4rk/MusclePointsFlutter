@@ -487,7 +487,7 @@ class Exercicios{
 
         listForm["exercicios"].removeAt(i);
         exerList.atualizarLista(json.encode(listForm));
-        savedata.salvarDadosEmArquivo(json.encode(listForm));
+        savedata.salvarDadosEmArquivo("listJson",json.encode(listForm));
         
       }
 

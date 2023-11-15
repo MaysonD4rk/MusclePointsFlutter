@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "310273507389",
+    "project_id": "musclepoints-71d09",
+    "storage_bucket": "musclepoints-71d09.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310273507389:android:99e29c098b933ec0412a54",
+        "android_client_info": {
+          "package_name": "com.company.musclepoints"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgIoFsji2rxjKP8GVghZBe17_PPL_iRZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310273507389:android:360146381f451ffe412a54",
+        "android_client_info": {
+          "package_name": "com.example.muscle_points"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgIoFsji2rxjKP8GVghZBe17_PPL_iRZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310273507389:android:2d6988c17aad22a4412a54",
+        "android_client_info": {
+          "package_name": "com.mswareg.musclepoints"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgIoFsji2rxjKP8GVghZBe17_PPL_iRZk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
