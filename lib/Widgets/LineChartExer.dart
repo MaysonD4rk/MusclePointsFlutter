@@ -37,7 +37,7 @@ class LineChartExer extends StatelessWidget {
     lineBarsData: lineBarsData1,
     minX: 0,
     maxX: 14,
-    maxY: 10,
+    maxY: currentMethod=="diet"? 5: 10,
     minY: 0,
   );
 
@@ -108,43 +108,30 @@ class LineChartExer extends StatelessWidget {
     const style = TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 12,
-        color: Colors.white
+        color: Colors.white,
     );
     String text = '';
 
+
     if(currentMethod == "diet"){
 
-      switch (value.toInt()) {
+      switch (value) {
         case 1:
-          text = '0.5kcal';
-          break;
-        case 2:
           text = '1.0kcal';
           break;
-        case 3:
-          text = '1.5kcal';
-          break;
-        case 4:
+        case 2:
           text = '2.0kcal';
           break;
-        case 5:
-          text = '2.5kcal';
-          break;
-        case 6:
+        case 3:
           text = '3.0kcal';
           break;
-        case 7:
-          text = '3.5kcal';
-          break;
-        case 8:
+        case 4:
           text = '4.0kcal';
           break;
-        case 9:
-          text = '4.5kcal';
+        case 5:
+          text = '5.0kcal';
           break;
-        case 10:
-          text = '5.0kcal>';
-          break;
+
         default:
           return Container();
       }
@@ -234,6 +221,7 @@ class LineChartExer extends StatelessWidget {
     interval: 1,
     reservedSize: 40,
   );
+
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
 
@@ -375,14 +363,94 @@ class LineChartExer extends StatelessWidget {
           space: 7,
           child: text,
         );
-      } else {
+      }
+    }else if(currentMethod == "diet" || currentMethod == "water" ){
+
+      int compararDatas(String a, String b) {
+        final partesA = a.split('/').map(int.parse).toList();
+        final partesB = b.split('/').map(int.parse).toList();
+
+        // Comparamos primeiro os dias (partesA[0] e partesB[0]),
+        // depois os meses (partesA[1] e partesB[1]).
+        if (partesA[1] == partesB[1]) {
+          return partesA[0].compareTo(partesB[0]);
+        } else {
+          return partesA[1].compareTo(partesB[1]);
+        }
+      }
+
+
+      Map<String, dynamic> jsonData = json.decode(lista!);
+
+      List<String> datesList = [];
+
+
+      // Itera sobre os exercícios
+      if (jsonData["dietScreen"].length > 0 && jsonData['dietScreen'][0].values.first.length > 0) {
+
+          //print(jsonData['dietScreen'][0]);
+
+
+        for (var date in jsonData['dietScreen']) {
+          // Itera sobre os treinos de cada exercício
+
+          datesList.add(date["date"].substring(0,5));
+
+        }
+
+        // Ordene a lista de datas
+        datesList.sort(compararDatas);
+
+        var lastWeek = datesList.length > 5 ? datesList.sublist(
+            datesList.length - 5) : datesList;
+
+
+
+        switch (value.toInt()) {
+          case 1:
+            text = Text(lastWeek[0] != null && lastWeek[0].isNotEmpty
+                ? lastWeek[0]
+                : "", style: style);
+            break;
+          case 4:
+            text = Text(lastWeek.length > 1 && lastWeek[1] != null &&
+                lastWeek[1].isNotEmpty ? lastWeek[1] : "",
+                style: style);
+            break;
+          case 7:
+            text = Text(lastWeek.length > 2 && lastWeek[2] != null &&
+                lastWeek[2].isNotEmpty ? lastWeek[2] : "",
+                style: style);
+            break;
+          case 10:
+            text = Text(lastWeek.length > 3 && lastWeek[3] != null &&
+                lastWeek[3].isNotEmpty ? lastWeek[3] : "",
+                style: style);
+            break;
+          case 13:
+            text = Text(lastWeek.length > 4 && lastWeek[4] != null &&
+                lastWeek[4].isNotEmpty ? lastWeek[4] : "",
+                style: style);
+            break;
+          case 16:
+            text = Text(lastWeek.length > 5 && lastWeek[5] != null &&
+                lastWeek[5].isNotEmpty ? lastWeek[5] : "",
+                style: style);
+            break;
+          default:
+            text = Text('');
+            break;
+        }
+
         return SideTitleWidget(
           axisSide: meta.axisSide,
           space: 7,
-          child: Text(""),
+          child: text,
         );
       }
     }
+
+
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 7,
@@ -459,7 +527,7 @@ class LineChartExer extends StatelessWidget {
       }).toList();
       print(exercicios);
       return exercicios;
-    }else{
+    }else if(currentMethod == "exercises"){
 
       var color = "";
       Map<String, dynamic> listaForm = json.decode(lista!);
@@ -500,76 +568,97 @@ class LineChartExer extends StatelessWidget {
       }).toList();
       print(exercicios);
       return exercicios;
+    }else if(currentMethod == "diet"){
+
+
+      Map<String, dynamic> dietConvert = json.decode(lista!);
+
+      List<FlSpot> maxKcal = [];
+      var currentKcal = 0;
+      var currentSpot = 1.0;
+
+      for(var item in dietConvert["dietScreen"]){
+        for(var eachMeal in item["diet"].keys){
+          var dietKcal =  int.parse(item["diet"][eachMeal]);
+          currentKcal += dietKcal;
+        }
+        maxKcal.add(FlSpot(currentSpot, currentKcal/1000));
+        currentKcal = 0;
+        currentSpot += 3;
+      }
+
+      //print(maxKcal);
+      var maxKcalFiltered = maxKcal.length>=5?maxKcal.getRange(dietConvert["dietScreen"].length-5, dietConvert["dietScreen"].length).toList(): maxKcal;
+
+
+      return [
+        LineChartBarData(
+          isCurved: true,
+          color: Colors.blue,
+          barWidth: 8,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(show: false),
+          spots: [...maxKcalFiltered],
+        ),
+      ];
+
+    }else if(currentMethod == "water"){
+
+      Map<String, dynamic> dietConvert = json.decode(lista!);
+
+      List<FlSpot> water = [];
+
+      var currentSpot = 1.0;
+
+      for(var item in dietConvert["dietScreen"]){
+        //print("${item["water"]+0}");
+        double waterValue = item["water"]/1000>10? 10.0 : item["water"]/1000;
+
+        water.add(FlSpot(currentSpot, waterValue));
+        print(currentSpot);
+        currentSpot += 3;
+      }
+
+      List<int> numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+      // Get a range of elements from index 2 to 6 (inclusive)
+      var waterFiltered = water.length>=5?water.getRange(dietConvert["dietScreen"].length-5, dietConvert["dietScreen"].length).toList(): water;
+
+      //print('Original List: $numbers');
+      //print('Sublist: $subList');
+
+
+      return [
+        LineChartBarData(
+          isCurved: true,
+          color: Colors.blue,
+          barWidth: 8,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(show: false),
+          spots: [...waterFiltered],
+        ),
+      ];
+
+    }else{
+      return [
+        LineChartBarData(
+          isCurved: true,
+          color: Colors.blue,
+          barWidth: 8,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          belowBarData: BarAreaData(show: false),
+          spots: [],
+        ),
+      ];
     }
+
+
 
   }
 
-  // LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-  //   isCurved: true,
-  //   color: Colors.green,
-  //   barWidth: 8,
-  //   isStrokeCapRound: true,
-  //   dotData: const FlDotData(show: false),
-  //   belowBarData: BarAreaData(show: false),
-  //   spots: const [
-  //     FlSpot(1, 1),
-  //     FlSpot(4, 1.5),
-  //     FlSpot(7, 1.4),
-  //     FlSpot(10, 3.4),
-  //     FlSpot(13, 1.8),
-  //   ],
-  // );
-
-  // LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-  //   isCurved: true,
-  //   color: Colors.pink,
-  //   barWidth: 8,
-  //   isStrokeCapRound: true,
-  //   dotData: const FlDotData(show: false),
-  //   belowBarData: BarAreaData(
-  //     show: false,
-  //     color: Colors.pink.withOpacity(0),
-  //   ),
-  //   spots: const [
-  //     FlSpot(1, 1),
-  //     FlSpot(4, 2.8),
-  //     FlSpot(7, 1.2),
-  //     FlSpot(10, 2.8),
-  //     FlSpot(13, 3.9),
-  //   ],
-  // );
-  //
-  // LineChartBarData get lineChartBarData1_3 => LineChartBarData(
-  //   isCurved: true,
-  //   color: Colors.blue,
-  //   barWidth: 8,
-  //   isStrokeCapRound: true,
-  //   dotData: const FlDotData(show: false),
-  //   belowBarData: BarAreaData(show: false),
-  //   spots: const [
-  //     FlSpot(1, 2.8),
-  //     FlSpot(4, 1.9),
-  //     FlSpot(7, 3),
-  //     FlSpot(10, 1.3),
-  //     FlSpot(13, 2.5),
-  //   ],
-  // );
-  //
-  // LineChartBarData get lineChartBarData1_4 => LineChartBarData(
-  //   isCurved: true,
-  //   color: Colors.orange,
-  //   barWidth: 8,
-  //   isStrokeCapRound: true,
-  //   dotData: const FlDotData(show: false),
-  //   belowBarData: BarAreaData(show: false),
-  //   spots: const [
-  //     FlSpot(1, 3),
-  //     FlSpot(4, 2.3),
-  //     FlSpot(7, 3.5),
-  //     FlSpot(10, 2.4),
-  //     FlSpot(13, 3),
-  //   ],
-  // );
 
 
 }

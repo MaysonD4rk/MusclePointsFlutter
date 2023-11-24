@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:muscle_points/Widgets/HighlightButton.dart';
 import '../firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -230,62 +231,6 @@ class _SelectWorkoutGroupState extends State<SelectWorkoutGroup> {
         }
         }
       )
-    );
-  }
-}
-
-
-
-
-class HighlightListItem extends StatefulWidget {
-  final String text;
-  final Color highlightColor;
-  final VoidCallback onTap;
-
-  HighlightListItem({
-    required this.text,
-    required this.highlightColor,
-    required this.onTap,
-  });
-
-  @override
-  _HighlightListItemState createState() => _HighlightListItemState();
-}
-
-class _HighlightListItemState extends State<HighlightListItem> {
-  bool isTapped = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          isTapped = true;
-        });
-        widget.onTap();
-      },
-      onTapUp: (_) {
-        setState(() {
-          isTapped = false;
-        });
-      },
-      onTapCancel: () {
-        setState(() {
-          isTapped = false;
-        });
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300), // Duração da animação
-        color: isTapped ? widget.highlightColor : Colors.transparent,
-        child: ListTile(
-          title: Text(widget.text, style: TextStyle(
-            fontSize: 17
-          ),),
-          subtitle: Text(
-              "Ultima vez treinado: 27/08/2003"),
-          // Outros widgets de conteúdo do item da lista
-        ),
-      ),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:muscle_points/Widgets/DietDataScreen.dart';
+import 'package:muscle_points/Widgets/HighlightButton.dart';
 
 class DietScreen extends StatefulWidget {
   const DietScreen({super.key});
@@ -15,9 +17,11 @@ class _DietScreenState extends State<DietScreen> {
     List<TextEditingController> _foodName = [];
     List<TextEditingController> _kcal = [];
 
-    //var dietList = '{"dietScreen": [{"date": "12/02", "diet": {"breakfest": "1000kcal", "almoco": "12kcal"}, "water": "15000"}]}';
-    var dietList = '{"dietScreen": []}';
-    var _waterDrunkCount = 0;
+    var dietList = '{"dietScreen": [{"date": "12/02/2023", "diet": {"breakfest": "1000", "almoco": "12"}, "water": 15000.0},{"date": "13/02/2023", "diet": {"breakfest": "1376", "almoco": "12"}, "water": 15000.0},{"date": "14/02/2023", "diet": {"breakfest": "831", "almoco": "12"}, "water": 15000.0}]}';
+    //var dietList = '{"dietScreen": []}';
+    var _waterDrunkCount = 0.0;
+
+    var _deletePressed = false;
 
 
     var _foodSelected = true;
@@ -116,9 +120,13 @@ class _DietScreenState extends State<DietScreen> {
             //       ),
             //       controller: _foodName[editingController],
             //     )
-            // ),
+            // ),(
+
+
+
 
             Text("$fieldName - "),
+
 
             // if(!_foodSelected) GestureDetector(
             //     onTap: (){},
@@ -134,6 +142,13 @@ class _DietScreenState extends State<DietScreen> {
                   controller: _kcal[editingController],
                 )
             ),
+            Visibility(
+                visible: _deletePressed,
+                child: IconButton(onPressed: (){
+                  deleteDietItem(editingController);
+                }, icon: Icon(Icons.delete))
+            )
+
 
           ],
         ),
@@ -147,11 +162,12 @@ class _DietScreenState extends State<DietScreen> {
             children: [
                Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Nome do alimento",
-                    ),
-                    controller:  _foodName[editingController],
-                  )
+                            decoration: InputDecoration(
+                              hintText: "Nome do alimento",
+                            ),
+                            controller:  _foodName[editingController],
+                          ),
+
               ),
 
               //if(_foodSelected) Text("$fieldName - "),
@@ -172,6 +188,11 @@ class _DietScreenState extends State<DietScreen> {
                   )
               ),
 
+              Visibility(
+                  visible: _deletePressed,
+                  child: IconButton(onPressed: (){}, icon: Icon(Icons.delete))
+              )
+
             ],
           ),
         );
@@ -186,6 +207,8 @@ class _DietScreenState extends State<DietScreen> {
       Map<String, dynamic> dietConverted = json.decode(dietList);
       var lastItem = dietConverted["dietScreen"].length>0? dietConverted["dietScreen"][dietConverted["dietScreen"].length - 1]: null;
 
+      //print(lastItem);
+
       DateTime dateNow = DateTime.now();
       String dataFormatada = DateFormat('dd/MM/yyyy').format(dateNow);
 
@@ -193,11 +216,72 @@ class _DietScreenState extends State<DietScreen> {
         lastItem["water"] = _waterDrunkCount;
         dietConverted["dietScreen"][dietConverted["dietScreen"].length - 1] = lastItem;
 
+        print(dietConverted["dietScreen"]);
         dietList = json.encode(dietConverted);
         print("salvo com sucesso!");
+
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => DietDataScreen(dietList: dietList)));
+
       }else{
+
+
+          dietConverted["dietScreen"].add({"date": dataFormatada, "diet": lastItem["diet"], "water": _waterDrunkCount });
+
+          dietList = json.encode(dietConverted);
+
+        //print(dietConverted["dietScreen"]);
+
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => DietDataScreen(dietList: dietList)));
         print("tem porra nenhuma carai");
       }
+
+    }
+
+//pos = position
+    deleteDietItem(pos){
+
+      DateTime dateNow = DateTime.now();
+      String dataFormatada = DateFormat('dd/MM/yyyy').format(dateNow);
+      print(dataFormatada);
+
+      Map<String, dynamic> dietConverted = json.decode(dietList);
+      var lastItem = dietConverted["dietScreen"].length>0? dietConverted["dietScreen"][dietConverted["dietScreen"].length - 1]: null;
+      print(lastItem);
+      var lastItemCopy = lastItem;
+
+      if(lastItem["date"] != dataFormatada){
+        lastItemCopy["date"] = dataFormatada;
+      }
+
+      print(lastItemCopy);
+
+      var currentIndex = 0;
+
+      for(var item in lastItem["diet"].keys){
+        if(currentIndex == pos ){
+          lastItemCopy["diet"].remove(item);
+          break;
+        }else{
+          ++currentIndex;
+        }
+      }
+
+      if(lastItem["date"] != dataFormatada){
+        dietConverted["dietScreen"].add(lastItemCopy);
+      }else{
+        lastItem["diet"] = lastItemCopy["diet"];
+        dietConverted["dietScreen"][dietConverted["dietScreen"].length-1] = lastItem;
+      }
+
+      var result = json.encode(dietConverted);
+      setState(
+          (){
+            dietList = result;
+          }
+      );
+
+
+      dietListConvert();
 
     }
 
@@ -245,8 +329,19 @@ class _DietScreenState extends State<DietScreen> {
                                       Padding(
                                           padding: EdgeInsets.all(16),
                                           child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
+
+                                                IconButton(
+                                                    onPressed: (){
+                                                      print("pressionado");
+                                                      setState(() {
+                                                        _deletePressed = !_deletePressed;
+                                                      });
+                                                      dietListConvert();
+                                                    },
+                                                    icon: Icon(Icons.remove)
+                                                ),
                                                 Text(
                                                   "Dieta",
                                                   style: TextStyle(
